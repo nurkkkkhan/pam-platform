@@ -1,3 +1,3 @@
-module github.com//pam-platform
+module github.com/nurkkkkhan/pam-platform
 
 go 1.22

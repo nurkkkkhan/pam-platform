@@ -17,8 +17,8 @@ System/DB administrators · security officers (approvers) · auditors · externa
 ## Team
 | Member | Responsibility |
 |---|---|
-| Member 1 — Backend (name to add) | Technology decisions, architecture and API contracts; control plane, identity, policy, vault, rotation, SSH/PostgreSQL gateways, audit, CI, threat model and performance testing |
-| Member 2 — Frontend and UI (name to add) | Project coordination, research and requirements; UX prototype, React interface, live-session controls, usability study, verification plan and evaluation report |
+| Member 1 — Ibyrkhanov Zhanibek, Backend | Technology decisions, architecture and API contracts; control plane, identity, policy, vault, rotation, SSH/PostgreSQL gateways, audit, CI, threat model and performance testing |
+| Member 2 — Khassenov Nurkhan, Frontend and UI | Project coordination, research and requirements; UX prototype, React interface, live-session controls, usability study, verification plan and evaluation report |
 
 Both members review each other's changes and integrate the system together. Member 1 owns the [OpenAPI contract](api/openapi.yaml), server-side OIDC/TOTP and authorized live-session APIs; Member 2 builds the browser OIDC flow and live-session interface against them. Member 2 leads the verification and evaluation documents using Member 1's security and performance evidence. The detailed 15-task allocation for each member is in [the backlog](project/youtrack-backlog.csv) and the separate [Member 1 plan](<project/Member 1 PAM Platform work plan.docx>) and [Member 2 plan](<project/Member 2 PAM Platform work plan.docx>). Assignment describes planned responsibility; it is not evidence that a named person performed past work.
 
@@ -27,7 +27,7 @@ Both members review each other's changes and integrate the system together. Memb
 ## Scope & status
 In scope: SSH, PostgreSQL, vault/rotation, JIT approvals, recording, command rules, audit, OIDC + TOTP. Out of scope: RDP, AD discovery, ML analytics, HA cluster.
 
-**Current status (24 October 2026):** initial analysis and design drafts, editable diagrams, a local clickable prototype, and Go `audit`, `vault`, and `policy` modules with unit tests are present. User interviews, supervisor feedback, a live YouTrack project, and progressive Git contributions are not evidenced in this supplied folder. The gateway, web UI, database integration, and complete application remain to be built; a complete application is not required at this checkpoint.
+**Current status (24 October 2026):** initial analysis and design drafts, editable diagrams, a clickable prototype, and Go `audit`, `vault`, and `policy` modules with unit tests are present. The GitHub repository is published and a YouTrack project URL is recorded. The live issue import, assignments, priorities, deadlines, user interviews, supervisor feedback, and progressive Git contributions by both members have not been verified. The gateway, web UI, database integration, and complete application remain to be built; a complete application is not required at this checkpoint.
 
 ## Technologies
 Go · PostgreSQL 16 · MinIO (S3) · React + TypeScript · gRPC/mTLS · REST/OpenAPI · Keycloak (OIDC) · Docker Compose. Justification: [technology comparison](docs/05-technology-comparison.md), [ADRs](docs/adr/).

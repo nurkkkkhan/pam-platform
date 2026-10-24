@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com//pam-platform/internal/audit"
+	"github.com/nurkkkkhan/pam-platform/internal/audit"
 )
 
 func main() {
