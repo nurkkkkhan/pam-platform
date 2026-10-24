@@ -33,8 +33,8 @@ In scope: SSH, PostgreSQL, vault/rotation, JIT approvals, recording, command rul
 Go · PostgreSQL 16 · MinIO (S3) · React + TypeScript · gRPC/mTLS · REST/OpenAPI · Keycloak (OIDC) · Docker Compose. Justification: [technology comparison](docs/05-technology-comparison.md), [ADRs](docs/adr/).
 
 ## Links
-- YouTrack: no project link has been supplied. The [local, assigned and prioritized backlog](project/youtrack-backlog.csv) is ready for the two members to review and import; add the real project link here once it exists.
-- GitHub/GitLab: no remote repository link has been supplied for this folder. Add the real repository link after publishing it.
+- YouTrack: [DP project](https://diploma-work.youtrack.cloud/projects/DP) and [local backlog](project/youtrack-backlog.csv).
+- GitHub: [pam-platform repository](https://github.com/nurkkkkhan/pam-platform).
 - Pre-defense 1 checklist: [docs/00-checklist-pre-defense-1.md](docs/00-checklist-pre-defense-1.md)
 - Prototype: [prototype/index.html](prototype/index.html) (local HTML file)
 - API: [api/openapi.yaml](api/openapi.yaml)
