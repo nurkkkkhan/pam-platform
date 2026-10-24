@@ -1,0 +1,31 @@
+# task	member	likely files (relative to repository root)	commit message
+DIP-1	Member 2	README.md CONTRIBUTING.md .gitignore Makefile	DIP-1: Establish repository structure and README
+DIP-2	Member 2	project/team.conf project/youtrack-backlog.csv project/README.md project/youtrack_import.py scripts/tasks.tsv	DIP-2: Set up assigned and prioritized project backlog
+DIP-3	Member 2	docs/01-project-proposal.md	DIP-3: Write project proposal and scope
+DIP-4	Member 2	docs/02-evidence-of-relevance.md docs/interviews	DIP-4: Document user research and relevance evidence
+DIP-5	Member 2	docs/03-literature-review.md	DIP-5: Review literature and analyze sources
+DIP-6	Member 2	docs/04-existing-systems-comparison.md	DIP-6: Compare existing PAM systems
+DIP-7	Member 1	docs/05-technology-comparison.md docs/adr	DIP-7: Compare technologies and record architecture decisions
+DIP-8	Member 2	docs/06-requirements-specification.md tests/test-cases.md	DIP-8: Specify requirements and acceptance criteria
+DIP-9	Member 1	diagrams docs/07-architecture.md api/openapi.yaml	DIP-9: Develop editable architecture diagrams
+DIP-10	Member 2	prototype docs/08-ux-prototype.md	DIP-10: Create prototype and UI examples
+DIP-11	Member 2	docs/09-verification-and-evaluation-plan.md	DIP-11: Define verification plan with backend evidence requirements
+DIP-12	Member 2	docs/10-project-management-and-risks.md docs/11-supervisor-feedback.md project/milestones.csv docs/GIT-SETUP.md docs/00-checklist-pre-defense-1.md	DIP-12: Record responsibilities, milestones and risks
+DIP-13	Member 2	SUBMISSION.md	DIP-13: Record verified pre-defense submission
+DIP-14	Member 1	src/spikes/ssh-proxy	DIP-14: Prototype an SSH proxy
+DIP-15	Member 1	src/internal/vault	DIP-15: Implement vault envelope encryption
+DIP-16	Member 1	src/internal/audit src/cmd/pam-audit src/cmd/pam-demo-audit tests/data	DIP-16: Implement audit chain and verifier CLI
+DIP-17	Member 1	src/internal/policy src/go.mod	DIP-17: Implement policy decisions
+DIP-18	Member 1	src/migrations	DIP-18: Add database schema and migrations
+DIP-19	Member 1	src/internal/auth	DIP-19: Implement server-side OIDC and TOTP step-up
+DIP-20	Member 1	.github/workflows/ci.yml	DIP-20: Add and verify CI security checks
+DIP-21	Member 1	docs/12-threat-model.md	DIP-21: Document STRIDE threat model
+DIP-22	Member 2	frontend	DIP-22: Build browser OIDC flow and web UI skeleton
+DIP-23	Member 1	src/internal/gateway/ssh	DIP-23: Build SSH gateway, recording and authorized live APIs
+DIP-24	Member 1	src/internal/access	DIP-24: Build JIT request and approval API
+DIP-25	Member 1	src/internal/rotation	DIP-25: Build credential rotation worker
+DIP-26	Member 1	src/internal/gateway/postgresql	DIP-26: Build PostgreSQL gateway
+DIP-27	Member 2	frontend	DIP-27: Add live-session view and termination controls to UI
+DIP-28	Member 1	tests/performance	DIP-28: Measure gateway performance
+DIP-29	Member 2	docs/13-usability-evaluation.md	DIP-29: Run and report usability study
+DIP-30	Member 2	docs/14-evaluation-report.md	DIP-30: Report evaluation with backend security and performance evidence

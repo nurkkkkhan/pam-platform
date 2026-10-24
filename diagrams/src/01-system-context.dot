@@ -1,0 +1,32 @@
+// System context diagram — PAM Platform (edit and run `make diagrams`)
+digraph context {
+  graph [rankdir=LR, fontname="Helvetica", fontsize=12, nodesep=0.5, ranksep=1.1, pad=0.3,
+         label="PAM Platform — System Context Diagram", labelloc=t, fontsize=16];
+  node  [fontname="Helvetica", fontsize=11, style="rounded,filled", shape=box, fillcolor="#eef2f7", color="#5b6b82"];
+  edge  [fontname="Helvetica", fontsize=9, color="#5b6b82"];
+
+  subgraph cluster_people { label="People"; style=dashed; color="#9aa7b8";
+    user     [label="Privileged user\n(admin, DBA, contractor)", shape=box, fillcolor="#fff4e0"];
+    approver [label="Approver /\nSecurity officer", fillcolor="#fff4e0"];
+    auditor  [label="Auditor", fillcolor="#fff4e0"];
+    padmin   [label="Platform administrator", fillcolor="#fff4e0"];
+  }
+
+  pam [label="PAM Platform\n\nCentralized privileged access:\nvault · JIT access · gateway ·\nrecording · audit", shape=box, style="rounded,filled,bold", fillcolor="#d7e8ff", color="#1f4e8c", fontsize=13, width=2.8, height=1.6];
+
+  subgraph cluster_ext { label="External systems"; style=dashed; color="#9aa7b8";
+    idp     [label="Corporate IdP\n(Keycloak / AD FS / Entra ID)"];
+    targets [label="Target infrastructure\nLinux servers (SSH)\nPostgreSQL databases"];
+    notify  [label="Notification channels\n(SMTP, Telegram, webhook)"];
+    siem    [label="SIEM / syslog\n(optional)"];
+  }
+
+  user     -> pam [label="HTTPS: request access\nSSH / psql via gateway"];
+  approver -> pam [label="HTTPS: approve, monitor,\nterminate"];
+  auditor  -> pam [label="HTTPS: search, replay,\nexport"];
+  padmin   -> pam [label="HTTPS / REST API:\nconfigure"];
+  pam -> idp     [label="OIDC login,\ngroup claims"];
+  pam -> targets [label="SSH / PG protocol with\ninjected credentials;\npassword/key rotation"];
+  pam -> notify  [label="approval requests,\nalerts"];
+  pam -> siem    [label="audit events"];
+}

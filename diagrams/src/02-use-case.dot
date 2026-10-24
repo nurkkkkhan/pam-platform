@@ -1,0 +1,65 @@
+// Use case diagram — PAM Platform
+digraph usecases {
+  graph [rankdir=LR, fontname="Helvetica", nodesep=0.18, ranksep=1.3, pad=0.3,
+         label="PAM Platform — Use Case Diagram", labelloc=t, fontsize=16];
+  node  [fontname="Helvetica", fontsize=10];
+  edge  [arrowhead=none, color="#5b6b82"];
+
+  // Actors
+  node [shape=box, style="filled", fillcolor="#fff4e0", color="#9a6b1f", fontsize=11, fontcolor="#1f2a3a"];
+  User      [label="Privileged user"];
+  Approver  [label="Approver"];
+  SecOff    [label="Security officer"];
+  Auditor   [label="Auditor"];
+  Admin     [label="Platform admin"];
+  Scheduler [label="Scheduler (system)"];
+  IdP       [label="Corporate IdP"];
+  Target    [label="Target system"];
+
+  subgraph cluster_sys {
+    label="PAM Platform"; fontsize=13; style="rounded"; color="#1f4e8c"; penwidth=1.5;
+    node [shape=ellipse, style=filled, fillcolor="#eef4ff", color="#1f4e8c", fontcolor="#111111"];
+    UC1  [label="UC1 Log in\n(SSO + MFA)"];
+    UC2  [label="UC2 Request\nJIT access"];
+    UC3  [label="UC3 Connect to target\nvia gateway"];
+    UC4  [label="UC4 Open web\nterminal"];
+    UC5  [label="UC5 View own\nrequests & sessions"];
+    UC6  [label="UC6 Approve /\nreject request"];
+    UC7  [label="UC7 Revoke grant"];
+    UC8  [label="UC8 Monitor live\nsession"];
+    UC9  [label="UC9 Terminate\nsession"];
+    UC10 [label="UC10 Manage\ncommand rules"];
+    UC11 [label="UC11 Receive alerts"];
+    UC12 [label="UC12 Search\naudit log"];
+    UC13 [label="UC13 Replay session"];
+    UC14 [label="UC14 Export / verify\naudit chain"];
+    UC15 [label="UC15 Access report"];
+    UC16 [label="UC16 Manage targets\n& accounts"];
+    UC17 [label="UC17 Manage roles\n& policies"];
+    UC18 [label="UC18 Register\ngateway"];
+    UC19 [label="UC19 Configure\nrotation"];
+    UC20 [label="UC20 Rotate\ncredentials"];
+    UC21 [label="UC21 Expire grants"];
+    INC1 [label="Check grant & MFA", fillcolor="#f4f4f4"];
+    INC2 [label="Inject credential", fillcolor="#f4f4f4"];
+    INC3 [label="Record session &\napply rules", fillcolor="#f4f4f4"];
+    EXT1 [label="Rotate after\nsession", fillcolor="#f4f4f4"];
+  }
+
+  User -> {UC1 UC2 UC3 UC4 UC5};
+  Approver -> {UC1 UC6 UC7};
+  SecOff -> {UC8 UC9 UC10 UC11};
+  Auditor -> {UC12 UC13 UC14 UC15};
+  Admin -> {UC16 UC17 UC18 UC19};
+  Scheduler -> {UC20 UC21};
+  UC1 -> IdP;
+  UC3 -> Target;
+  UC20 -> Target;
+
+  edge [arrowhead=vee, style=dashed, fontsize=8, fontname="Helvetica", color="#7a869a"];
+  UC3 -> INC1 [label="«include»"];
+  UC3 -> INC2 [label="«include»"];
+  UC3 -> INC3 [label="«include»"];
+  UC4 -> UC3  [label="«extend»"];
+  EXT1 -> UC3 [label="«extend»"];
+}

@@ -1,0 +1,59 @@
+// Component diagram (draft) — PAM Platform
+digraph components {
+  graph [rankdir=LR, fontname="Helvetica", nodesep=0.35, ranksep=0.9, pad=0.3, compound=true,
+         label="PAM Platform — Component Diagram (draft)", labelloc=t, fontsize=16];
+  node  [fontname="Helvetica", fontsize=10, shape=component, style=filled, fillcolor="#eef4ff", color="#1f4e8c"];
+  edge  [fontname="Helvetica", fontsize=8, color="#5b6b82"];
+
+  browser [label="Browser", shape=box, style="rounded,filled", fillcolor="#fff4e0", color="#9a6b1f"];
+  client  [label="OpenSSH / psql /\nDBeaver client", shape=box, style="rounded,filled", fillcolor="#fff4e0", color="#9a6b1f"];
+
+  ui [label="Web UI\n(React + TS, xterm.js,\nasciinema-player)"];
+
+  subgraph cluster_cp { label="Control plane (Go)  — Policy Decision Point"; style="rounded"; color="#1f4e8c";
+    api    [label="API service\nREST + WebSocket\nOIDC, MFA"];
+    policy [label="Policy engine\nRBAC, context,\ncommand rules"];
+    access [label="Request / approval\nservice (JIT, TTL)"];
+    vault  [label="Vault\nenvelope encryption\nAES-256-GCM"];
+    rot    [label="Rotation worker"];
+    audit  [label="Audit service\nhash chain, export,\nSIEM forwarder"];
+    notif  [label="Notification\nservice"];
+    grpc   [label="Gateway API\n(gRPC, mTLS)"];
+  }
+
+  subgraph cluster_gw { label="Access gateway 1..n (Go) — Policy Enforcement Point"; style="rounded"; color="#1f4e8c";
+    sshp [label="SSH proxy"];
+    pgp  [label="PostgreSQL proxy"];
+    rec  [label="Recorder +\ninline rule filter"];
+  }
+
+  subgraph cluster_data { label="Data"; style="rounded"; color="#5b6b82";
+    db  [label="PostgreSQL 16\nmetadata, grants,\naudit_events, jobs", shape=cylinder, fillcolor="#eaf6ee", color="#2f7a4a"];
+    s3  [label="MinIO (S3)\nrecordings,\nobject lock", shape=cylinder, fillcolor="#eaf6ee", color="#2f7a4a"];
+    kek [label="KEK provider\n(file / KMS / HSM)", shape=note, fillcolor="#fdeaea", color="#aa3333"];
+  }
+
+  idp     [label="Corporate IdP\n(OIDC)", shape=box, style="rounded,filled", fillcolor="#f4f4f4", color="#777777"];
+  targets [label="Targets\nLinux (SSH), PostgreSQL", shape=box3d, style=filled, fillcolor="#f4f4f4", color="#777777"];
+  chan    [label="SMTP / Telegram /\nwebhook", shape=box, style="rounded,filled", fillcolor="#f4f4f4", color="#777777"];
+
+  browser -> ui [label="HTTPS"];
+  ui -> api [label="REST/JSON,\nWebSocket"];
+  api -> idp [label="OIDC"];
+  api -> policy; api -> access; api -> audit;
+  access -> notif; notif -> chan;
+  grpc -> policy [label="Authorize"];
+  grpc -> vault  [label="GetCredential"];
+  grpc -> audit  [label="events"];
+  vault -> kek   [label="wrap/unwrap DEK"];
+  rot -> vault; rot -> targets [label="change password/key"];
+  api -> db; access -> db; vault -> db; audit -> db; rot -> db;
+
+  client -> sshp [label="SSH"];
+  client -> pgp  [label="PG wire / TLS"];
+  sshp -> rec; pgp -> rec;
+  rec -> grpc [label="gRPC mTLS:\nAuthorize, GetCredential,\nStreamEvents"];
+  rec -> s3   [label="S3 upload"];
+  sshp -> targets [label="SSH (injected key)"];
+  pgp  -> targets [label="PG (injected password)"];
+}

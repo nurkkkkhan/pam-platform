@@ -1,0 +1,38 @@
+server:
+  listen: ":8443"
+  tls_cert: /etc/pam-platform/tls.crt
+  tls_key: /etc/pam-platform/tls.key
+grpc:
+  listen: ":9443"
+auth:
+  oidc_issuer: ${PAM_OIDC_ISSUER}
+  client_id: ${PAM_OIDC_CLIENT_ID}
+  mfa_max_age: 15m
+vault:
+  kek_provider: file
+  kek_file: ${PAM_KEK_FILE}
+audit:
+  anchor_interval: 10m
+  anchor_targets: [file:/var/lib/pam-platform/anchors.log]
+recordings:
+  s3_endpoint: ${PAM_S3_ENDPOINT}
+  bucket: pam-recordings
+  retention_days: 365
+policies:
+  - name: prod-linux
+    target_group: prod-linux
+    max_ttl: 4h
+    required_approvals: 1
+    allowed_hours: [0, 24]
+    rotate_after_session: true
+    command_rules:
+      - { id: R-1, pattern: '^rm\s+-rf\s+/\s*$', action: block }
+      - { id: R-2, pattern: '^mkfs', action: block }
+      - { id: R-3, pattern: 'rm\s+-rf\s+/var/lib/postgresql', action: block }
+  - name: prod-db
+    target_group: prod-postgres
+    max_ttl: 2h
+    required_approvals: 1
+    command_rules:
+      - { id: R-10, pattern: '(?i)^\s*drop\s+database', action: block }
+      - { id: R-11, pattern: '(?i)^\s*delete\s+from\s+\w+\s*;?$', action: alert }

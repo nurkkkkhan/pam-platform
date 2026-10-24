@@ -1,0 +1,31 @@
+Issue Id,Summary,Assignee,Subsystem,Priority,State,Acceptance criteria,Milestone
+DIP-1,"Create repository, README and structure",Member 2,Documentation,Critical,In Progress,"Published Git repository with README, docs/, diagrams/, src/, tests/, config/; supervisor and committee access confirmed",M1
+DIP-2,Set up YouTrack project and backlog,Member 2,Management,Critical,Open,Real YouTrack project exists; both members assigned; priorities and deadlines visible; URL recorded in README,M1
+DIP-3,Write project proposal and scope,Member 2,Documentation,Critical,In Progress,Proposal and scope drafted in docs/01 and substantive supervisor review recorded,M1
+DIP-4,Prepare interview guide and conduct 3-5 interviews,Member 2,Research,Critical,Open,≥3 anonymized interview notes in docs/interviews; assumptions table updated,M1
+DIP-5,"Literature review (≥12 sources, ≥8 scientific)",Member 2,Research,Critical,In Progress,docs/03 with analysis table and verified references,M1
+DIP-6,Existing system comparison,Member 2,Research,Critical,In Progress,5 systems × 10 criteria with evidence links,M1
+DIP-7,Technology comparison and ADRs,Member 1,Design,Critical,In Progress,≥3 decisions × 2-3 alternatives; ADR-001..005,M1
+DIP-8,Requirements specification v0.1,Member 2,Design,Critical,In Progress,FR/NFR with MoSCoW and testable acceptance criteria,M1
+DIP-9,"System context, use case and component diagrams",Member 1,Design,Critical,In Progress,DOT sources + SVG/PNG exports consistent with requirements; OpenAPI draft defines UI/backend contract,M1
+DIP-10,Clickable prototype of key scenarios,Member 2,UX,Critical,In Progress,"prototype/index.html covers request, approve, live, replay, vault, audit",M1
+DIP-11,Verification and evaluation plan,Member 2,QA,Critical,In Progress,"Test plan, metrics and baseline defined; backend security/performance measures agreed with Member 1",M1
+DIP-12,"Risks, milestones, responsibilities",Member 2,Management,Major,In Progress,docs/10 complete,M1
+DIP-13,Tag pre-defense-1 and submission summary,Member 2,Management,Critical,Open,Real pre-defense-1 tag pushed; repository URL and honest submission summary recorded,M1
+DIP-14,Spike: Go SSH proxy proof of concept,Member 1,Implementation,Major,Open,PoC proxies interactive shell to test sshd,M2
+DIP-15,Vault envelope encryption module,Member 1,Implementation,Critical,In Progress,"Unit tests: round trip, AAD binding, tamper, KEK rewrap; coverage ≥70%",M2
+DIP-16,Hash-chained audit module and verifier CLI,Member 1,Implementation,Critical,In Progress,Tests detect modify/delete/reorder; CLI verifies export,M2
+DIP-17,"Policy decision module (grant, MFA age, time window)",Member 1,Implementation,Critical,In Progress,Table-driven tests for allow/deny cases,M2
+DIP-18,Database schema and migrations,Member 1,Implementation,Critical,Open,Migrations apply on clean PG16; ER diagram added,M2
+DIP-19,Server-side OIDC login + TOTP step-up,Member 1,Implementation,Critical,Open,T-U1 and T-U2 pass against Keycloak; browser login contract documented,M2
+DIP-20,"CI pipeline (tests, vet, gitleaks, gosec, Trivy)",Member 1,DevOps,Major,Open,CI green on main; fails on seeded secret,M2
+DIP-21,Threat model (STRIDE) of the platform,Member 1,Security,Critical,Open,High threats and mitigations documented; real supervisor review recorded,M2
+DIP-22,Web UI skeleton (React + browser OIDC),Member 2,Implementation,Major,Open,Browser login and dashboard use documented backend auth API,M3
+DIP-23,SSH gateway with credential injection + recording,Member 1,Implementation,Critical,Open,T-G1 and T-M1 pass; authorized live-event stream and session termination API documented for UI handoff,M3
+DIP-24,JIT request/approval workflow API,Member 1,Implementation,Critical,Open,"T-A2, T-A3, T-A5 pass",M3
+DIP-25,Rotation worker for Linux and PostgreSQL,Member 1,Implementation,Critical,Open,"T-V2, T-V3 pass",M4
+DIP-26,PostgreSQL gateway,Member 1,Implementation,Critical,Open,"T-G2, T-M4 pass",M4
+DIP-27,Live-session view and terminate controls in UI,Member 2,Implementation,Critical,Open,Browser displays live session events and invokes documented terminate API; T-M3 UI scenario passes,M4
+DIP-28,Performance test bench and measurements,Member 1,QA,Major,Open,"M8, M9 measured and reported",M4
+DIP-29,Usability test with 5 users (SUS),Member 2,UX,Major,Open,SUS results documented,M5
+DIP-30,Evaluation report vs baseline,Member 2,Documentation,Critical,Open,"Metrics M1–M11 reported against baseline, including Member 1 security and performance evidence",M6

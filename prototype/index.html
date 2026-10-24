@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PAM Platform Prototype</title>
+<style>
+:root{--bg:#f5f7fa;--panel:#fff;--ink:#16202e;--muted:#5d6b7e;--line:#dde3ea;--brand:#1f4e8c;--brand-2:#e6eefa;--ok:#1d7a46;--ok-bg:#e5f4ea;--warn:#9a6200;--warn-bg:#fff3dc;--bad:#b42318;--bad-bg:#fdecea;--term:#0e1520;--term-ink:#d7e3f4}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f141b;--panel:#171e28;--ink:#e6edf5;--muted:#93a1b3;--line:#273242;--brand:#7fb0ff;--brand-2:#1c2a40;--ok:#5fd08f;--ok-bg:#143022;--warn:#f2b552;--warn-bg:#33270f;--bad:#ff8a80;--bad-bg:#3a1915;--term:#05080c}}
+*{box-sizing:border-box}body{margin:0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+nav{background:var(--panel);border-right:1px solid var(--line);padding:16px 10px}
+.logo{font-weight:700;font-size:17px;padding:4px 10px 16px;color:var(--brand)}.logo small{display:block;color:var(--muted);font-weight:400;font-size:11px}
+nav button{display:flex;width:100%;gap:8px;align-items:center;border:0;background:none;color:var(--ink);padding:9px 10px;border-radius:8px;cursor:pointer;font:inherit;text-align:left}
+nav button:hover{background:var(--brand-2)}nav button.active{background:var(--brand-2);color:var(--brand);font-weight:600}
+.role{margin:18px 10px 0;font-size:12px;color:var(--muted)}.role select{width:100%;margin-top:4px;padding:6px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+main{padding:22px 28px;max-width:1200px;width:100%}
+h1{font-size:21px;margin:0 0 4px}.sub{color:var(--muted);margin:0 0 18px}
+.grid{display:grid;gap:14px}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h3{margin:0 0 10px;font-size:14px}.kpi{font-size:26px;font-weight:700}.muted{color:var(--muted)}
+table{width:100%;border-collapse:collapse}th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{font-size:12px;color:var(--muted);font-weight:600}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;font-weight:600}.ok{background:var(--ok-bg);color:var(--ok)}.warn{background:var(--warn-bg);color:var(--warn)}.bad{background:var(--bad-bg);color:var(--bad)}.info{background:var(--brand-2);color:var(--brand)}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer;font:inherit}.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}.btn.danger{color:var(--bad);border-color:var(--bad)}.btn[disabled]{opacity:.45;cursor:not-allowed}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12.5px}
+.cmd{background:var(--term);color:var(--term-ink);padding:10px 12px;border-radius:8px;overflow-x:auto;white-space:pre}
+label{display:block;font-weight:600;margin:12px 0 4px;font-size:13px}input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit}
+.term{background:var(--term);color:var(--term-ink);border-radius:10px;padding:12px 14px;min-height:260px;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;white-space:pre-wrap;overflow:auto}
+.term .blk{color:#ff8a80}.term .sys{color:#7fb0ff}
+.timeline{position:relative;height:28px;background:var(--brand-2);border-radius:6px;margin:10px 0}.mark{position:absolute;top:0;width:3px;height:28px;background:var(--bad)}.head{position:absolute;top:0;width:2px;height:28px;background:var(--brand)}
+.toast{position:fixed;right:18px;bottom:18px;background:var(--ink);color:var(--panel);padding:10px 14px;border-radius:8px;opacity:0;transition:.25s;pointer-events:none}.toast.show{opacity:1}
+.banner{border:1px dashed var(--line);padding:8px 12px;border-radius:8px;color:var(--muted);font-size:12px;margin-bottom:16px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+@media (max-width:820px){.app{grid-template-columns:1fr}nav{display:flex;overflow-x:auto;gap:4px;border-right:0;border-bottom:1px solid var(--line)}nav button{white-space:nowrap;width:auto}.logo,.role{display:none}main{padding:16px}.g3,.g2{grid-template-columns:1fr}table{display:block;overflow-x:auto}}
+</style>
+</head>
+<body>
+<div class="app">
+<nav>
+  <div class="logo">PAM Platform<small>Prototype v0.1 · pre-defense 1</small></div>
+  <button data-v="dash" class="active">▦ Dashboard</button>
+  <button data-v="req">＋ Request access</button>
+  <button data-v="appr">✓ Approvals <span class="pill warn" id="apprCount" style="margin-left:auto">2</span></button>
+  <button data-v="live">◉ Live sessions</button>
+  <button data-v="replay">▶ Session replay</button>
+  <button data-v="vault">🔒 Vault &amp; accounts</button>
+  <button data-v="audit">≡ Audit log</button>
+  <div class="role">Viewing as<select id="role"><option value="alice">alice — Linux admin</option><option value="s.nurlanova">s.nurlanova — Security officer</option></select></div>
+</nav>
+<main id="main"></main>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const S={user:'alice',reqs:[
+ {id:'REQ-2087',by:'alice',target:'db-prod-01',acc:'root',dur:'2h',reason:'INC-1042: disk full on /var',status:'pending'},
+ {id:'REQ-2088',by:'d.omarov (contractor)',target:'web-01, web-02',acc:'deploy',dur:'8h',reason:'Release 3.4 deployment',status:'pending'},
+ {id:'REQ-2079',by:'alice',target:'pg-billing',acc:'app_admin',dur:'1h',reason:'Fix invoice index',status:'approved'}],
+ audit:[]};
+const $=s=>document.querySelector(s);
+const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
+function pill(s){return {pending:'<span class="pill warn">pending</span>',approved:'<span class="pill ok">approved</span>',rejected:'<span class="pill bad">rejected</span>'}[s]}
+const V={
+dash:()=>`<h1>Good afternoon, ${S.user}</h1><p class="sub">You have no standing privileged access. Request a grant when you need it.</p>
+<div class="banner">Prototype with fictional data. Covers FR-A1, FR-A2, FR-A3, FR-M1–M4, FR-V1–V3, FR-AU1–AU3.</div>
+<div class="grid g3"><div class="card"><h3>Active grants</h3><div class="kpi">1</div><div class="muted">pg-billing · app_admin · 38 min left</div></div>
+<div class="card"><h3>Pending requests</h3><div class="kpi">${S.reqs.filter(r=>r.status==='pending'&&r.by===S.user).length}</div><div class="muted">waiting for approver</div></div>
+<div class="card"><h3>Sessions this week</h3><div class="kpi">7</div><div class="muted">all recorded · 0 rule hits</div></div></div>
+<div class="card" style="margin-top:14px"><h3>How to connect (grant G-548 · pg-billing)</h3>
+<div class="cmd">pam db-token --target pg-billing --account app_admin
+psql "host=gw.corp.local port=6432 user=${S.user}%app_admin%pg-billing dbname=billing"</div>
+<p class="muted">SSH example: <code>ssh ${S.user}%root%db-prod-01@gw.corp.local</code> — you never see the target password.</p></div>
+<div class="card" style="margin-top:14px"><h3>My requests</h3><table><tr><th>ID</th><th>Target</th><th>Account</th><th>Duration</th><th>Status</th></tr>
+${S.reqs.filter(r=>r.by===S.user).map(r=>`<tr><td class="mono">${r.id}</td><td>${r.target}</td><td>${r.acc}</td><td>${r.dur}</td><td>${pill(r.status)}</td></tr>`).join('')}</table></div>`,
+req:()=>`<h1>Request privileged access</h1><p class="sub">Just-in-time grant. Max duration is set by the target group's policy.</p>
+<div class="grid g2"><div class="card"><form id="rf">
+<label>Target</label><select id="t"><option>db-prod-01 (Linux, prod)</option><option>web-01 (Linux, prod)</option><option>pg-billing (PostgreSQL, prod)</option><option>dev-box-3 (Linux, dev — auto-approve)</option></select>
+<label>Account</label><select id="a"><option>root</option><option>deploy</option><option>postgres</option></select>
+<label>Duration</label><select id="d"><option>30 min</option><option selected>2 h</option><option>4 h</option><option>8 h (exceeds prod max 4 h)</option></select>
+<label>Reason / ticket</label><textarea id="r" rows="3" placeholder="e.g. INC-1042: disk full on /var" required></textarea>
+<div class="row" style="margin-top:14px"><button class="btn primary">Submit request</button><span class="muted" id="err"></span></div></form></div>
+<div class="card"><h3>Policy: prod-linux</h3><table>
+<tr><td>Approvals required</td><td>1 (security officer or team lead)</td></tr><tr><td>Max duration</td><td>4 h</td></tr>
+<tr><td>Allowed hours</td><td>any; off-hours triggers alert</td></tr><tr><td>MFA</td><td>TOTP ≤ 15 min before session</td></tr>
+<tr><td>Recording</td><td>mandatory</td></tr><tr><td>Rotation</td><td>after every session</td></tr><tr><td>Blocked commands</td><td><code>rm -rf /</code>, <code>mkfs*</code>, <code>DROP DATABASE</code></td></tr></table></div></div>`,
+appr:()=>`<h1>Approvals</h1><p class="sub">Separation of duties: you cannot approve your own request.</p><div class="card"><table>
+<tr><th>ID</th><th>Requester</th><th>Target / account</th><th>Duration</th><th>Reason</th><th>Status</th><th></th></tr>
+${S.reqs.map(r=>{const own=r.by===S.user;return `<tr><td class="mono">${r.id}</td><td>${r.by}</td><td>${r.target}<br><span class="muted">${r.acc}</span></td><td>${r.dur}</td><td>${escapeHtml(r.reason)}</td><td>${pill(r.status)}</td>
+<td>${r.status==='pending'?`<div class="row"><button class="btn primary" data-ap="${r.id}" ${own?'disabled title="Requester cannot approve own request (FR-A3)"':''}>Approve</button><button class="btn danger" data-rj="${r.id}" ${own?'disabled':''}>Reject</button></div>${own?'<div class="muted" style="font-size:12px">own request</div>':''}`:''}</td></tr>`}).join('')}</table>
+<p class="muted">Tip: switch "Viewing as" to the security officer to approve alice's request.</p></div>`,
+live:()=>`<h1>Live sessions</h1><p class="sub">Real-time view for the security officer. Output delay ≤ 2 s (FR-M3).</p>
+<div class="grid g2"><div class="card"><table><tr><th>Session</th><th>User → target</th><th>Started</th><th>Grant left</th></tr>
+<tr><td class="mono">S-9f31</td><td>alice → root@db-prod-01</td><td>14:05</td><td>1h 52m</td></tr>
+<tr><td class="mono">S-9f2c</td><td>d.omarov → deploy@web-01</td><td>13:40</td><td>7h 27m</td></tr></table></div>
+<div class="card"><div class="row" style="justify-content:space-between"><h3>S-9f31 · alice → root@db-prod-01</h3><span class="pill bad">● REC</span></div>
+<div class="term" id="lt"><span class="sys">PAM Platform: session S-9f31 is recorded. Grant expires 16:05.</span>
+root@db-prod-01:~# df -h /var
+Filesystem  Size  Used Avail Use% Mounted on
+/dev/sda2    40G   39G  1.0G  98% /var
+root@db-prod-01:~# du -sh /var/log/* | sort -h | tail -3
+</div><div class="row" style="margin-top:10px"><button class="btn" id="sim">Simulate next command</button><button class="btn danger" id="kill">Terminate session</button></div></div></div>`,
+replay:()=>`<h1>Session replay</h1><p class="sub">S-9f31 · alice → root@db-prod-01 · 24.10.2026 14:05–14:31 · SHA-256 <span class="mono">a91c…7e02</span> (in audit #18241)</p>
+<div class="card"><div class="row"><input id="q" placeholder="Search commands, e.g. rm" style="max-width:280px"><button class="btn" id="qs">Find</button><span class="muted">Red marks = rule hits</span></div>
+<div class="timeline"><div class="mark" style="left:62%" title="R-3 blocked"></div><div class="head" id="hd" style="left:0"></div></div>
+<table id="cmds"><tr><th>Time</th><th>Command</th><th>Result</th></tr>
+<tr data-p="8"><td class="mono">14:06:02</td><td class="mono">df -h /var</td><td>—</td></tr>
+<tr data-p="20"><td class="mono">14:07:40</td><td class="mono">du -sh /var/log/* | sort -h</td><td>—</td></tr>
+<tr data-p="41"><td class="mono">14:12:15</td><td class="mono">journalctl --vacuum-size=500M</td><td>—</td></tr>
+<tr data-p="62"><td class="mono">14:18:51</td><td class="mono">rm -rf /var/lib/postgresql</td><td><span class="pill bad">blocked · R-3</span></td></tr>
+<tr data-p="90"><td class="mono">14:30:58</td><td class="mono">exit</td><td>—</td></tr></table></div>`,
+vault:()=>`<h1>Vault &amp; privileged accounts</h1><p class="sub">Secrets are encrypted (AES-256-GCM envelope). Users connect through the gateway and never see them.</p>
+<div class="card"><table><tr><th>Account</th><th>Target</th><th>Type</th><th>Rotation policy</th><th>Last rotated</th><th>Version</th><th>Status</th></tr>
+<tr><td>root</td><td>db-prod-01</td><td>SSH key</td><td>after every session</td><td>today 14:31</td><td>v42</td><td><span class="pill ok">in sync</span></td></tr>
+<tr><td>deploy</td><td>web-01</td><td>SSH key</td><td>every 24 h</td><td>today 03:00</td><td>v118</td><td><span class="pill ok">in sync</span></td></tr>
+<tr><td>app_admin</td><td>pg-billing</td><td>password</td><td>after session + 24 h</td><td>today 11:12</td><td>v77</td><td><span class="pill ok">in sync</span></td></tr>
+<tr><td>postgres</td><td>pg-hr</td><td>password</td><td>every 24 h</td><td>2 days ago</td><td>v12</td><td><span class="pill bad">rotation failed: target unreachable</span></td></tr></table>
+<div class="row" style="margin-top:12px"><button class="btn" onclick="toast('Rotation job queued for postgres@pg-hr')">Retry rotation</button><button class="btn" onclick="toast('Check-out requires approval (FR-V4)')">Request check-out…</button></div></div>`,
+audit:()=>`<h1>Audit log</h1><p class="sub">Illustrative events and hashes. This prototype does not verify a chain or an external anchor.</p>
+<div class="card"><div class="row"><input placeholder="Filter: user, target, action" style="max-width:300px"><button class="btn" id="vf">Show verification concept</button><button class="btn" onclick="toast('Prototype only: no JSON file was exported')">Export JSON</button><button class="btn" onclick="toast('Prototype only: no CSV file was exported')">Export CSV</button><span id="vr"></span></div>
+<table style="margin-top:10px"><tr><th>#</th><th>Time</th><th>Actor</th><th>Action</th><th>Object</th><th>Hash</th></tr>
+${[...S.audit,
+['18241','14:31:02','gateway-1','session.ended','session/S-9f31','5c0e…a7d1'],
+['18240','14:31:01','rotation','secret.rotated','root@db-prod-01 v42','9b12…c3f0'],
+['18234','14:18:51','alice','rule.blocked','session/S-9f31 · R-3','d07f…11e8'],
+['18229','14:05:10','alice','session.started','session/S-9f31','33aa…0b9e'],
+['18227','14:05:02','s.nurlanova','request.approved','REQ-2087 → G-551','be41…92d3'],
+['18220','13:58:44','alice','request.created','REQ-2087','4be1…c9a2']].map(r=>`<tr>${r.map((c,i)=>`<td class="${i==0||i==5?'mono':''}">${c}</td>`).join('')}</tr>`).join('')}</table></div>`
+};
+let n=18242;
+function log(actor,action,obj){S.audit.unshift([String(n++),new Date().toTimeString().slice(0,8),actor,action,obj,Math.random().toString(16).slice(2,6)+'…'+Math.random().toString(16).slice(2,6)])}
+function show(v){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.v===v));$('#main').innerHTML=V[v]();bind(v);$('#apprCount').textContent=S.reqs.filter(r=>r.status==='pending').length}
+function bind(v){
+ if(v==='req')$('#rf').onsubmit=e=>{e.preventDefault();const d=$('#d').value;if(d.startsWith('8')){$('#err').innerHTML='<span class="pill bad">Rejected: 8 h exceeds policy max 4 h (FR-A2)</span>';return}
+  const auto=$('#t').value.includes('dev');const id='REQ-'+(2089+S.reqs.length);S.reqs.push({id,by:S.user,target:$('#t').value.split(' ')[0],acc:$('#a').value,dur:d,reason:$('#r').value,status:auto?'approved':'pending'});log(S.user,'request.created',id);toast(auto?id+' auto-approved (dev policy)':id+' sent · approver notified via Telegram');show('dash')};
+ if(v==='appr')document.querySelectorAll('[data-ap],[data-rj]').forEach(b=>b.onclick=()=>{const id=b.dataset.ap||b.dataset.rj,r=S.reqs.find(x=>x.id===id);r.status=b.dataset.ap?'approved':'rejected';log(S.user,'request.'+r.status,id);toast(id+' '+r.status);show('appr')});
+ if(v==='live'){let i=0;const seq=['<br>4.1G /var/log/journal<br>root@db-prod-01:~# rm -rf /var/lib/postgresql<br><span class="blk">PAM Platform: command blocked by rule R-3 "Destructive delete on DB data dir". Security team notified.</span><br>root@db-prod-01:~# ','journalctl --vacuum-size=500M<br>Vacuuming done, freed 3.6G.<br>root@db-prod-01:~# '];
+  $('#sim').onclick=()=>{if(i<seq.length){$('#lt').innerHTML+=seq[i++];if(i===1)toast('Alert: rule R-3 hit in S-9f31')}};
+  $('#kill').onclick=()=>{$('#lt').innerHTML+='<br><span class="blk">PAM Platform: session terminated by s.nurlanova.</span>';log('s.nurlanova','session.terminated','session/S-9f31');toast('Session S-9f31 terminated')}}
+ if(v==='replay'){$('#qs').onclick=()=>{const q=$('#q').value.trim();document.querySelectorAll('#cmds tr[data-p]').forEach(tr=>{const hit=q&&tr.cells[1].textContent.includes(q);tr.style.background=hit?'var(--warn-bg)':'';if(hit)$('#hd').style.left=tr.dataset.p+'%'})};
+  document.querySelectorAll('#cmds tr[data-p]').forEach(tr=>tr.onclick=()=>$('#hd').style.left=tr.dataset.p+'%')}
+ if(v==='audit')$('#vf').onclick=()=>{$('#vr').innerHTML='<span class="pill info">Demo only · verification was not run</span>'};
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.v));
+$('#role').onchange=e=>{S.user=e.target.value;show(document.querySelector('nav button.active').dataset.v)};
+show('dash');
+</script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+openapi: 3.0.3
+info:
+  title: PAM Platform API
+  version: 0.1.0
+  description: Control-plane REST API (draft for pre-defense 1). Internal gateway API is gRPC (see docs/07).
+servers: [{ url: https://pam.corp.local/api/v1 }]
+security: [{ oidc: [] }]
+components:
+  securitySchemes:
+    oidc: { type: openIdConnect, openIdConnectUrl: https://idp.corp.local/realms/pam/.well-known/openid-configuration }
+  schemas:
+    Error: { type: object, required: [error, message], properties: { error: { type: string }, message: { type: string } } }
+    AccessRequestCreate:
+      type: object
+      required: [target_id, account, duration_minutes, reason]
+      properties:
+        target_id: { type: string, example: tgt_db-prod-01 }
+        account: { type: string, example: root }
+        duration_minutes: { type: integer, minimum: 5, example: 120 }
+        reason: { type: string, minLength: 5, example: "INC-1042: disk full on /var" }
+    AccessRequest:
+      allOf:
+        - $ref: '#/components/schemas/AccessRequestCreate'
+        - type: object
+          properties:
+            id: { type: string, example: REQ-2087 }
+            requester: { type: string }
+            status: { type: string, enum: [pending, approved, rejected, expired, cancelled] }
+            required_approvals: { type: integer }
+            grant: { $ref: '#/components/schemas/Grant' }
+    Grant:
+      type: object
+      properties:
+        id: { type: string, example: G-551 }
+        valid_from: { type: string, format: date-time }
+        valid_until: { type: string, format: date-time }
+        revoked: { type: boolean }
+    Target:
+      type: object
+      required: [name, protocol, address]
+      properties:
+        id: { type: string }
+        name: { type: string, example: db-prod-01 }
+        protocol: { type: string, enum: [ssh, postgres] }
+        address: { type: string, example: 10.0.5.21:22 }
+        group: { type: string, example: prod-linux }
+    Account:
+      type: object
+      required: [target_id, username, secret_type]
+      properties:
+        id: { type: string }
+        target_id: { type: string }
+        username: { type: string }
+        secret_type: { type: string, enum: [password, ssh_key] }
+        rotation: { type: string, enum: [after_session, daily, manual] }
+        version: { type: integer, readOnly: true }
+        last_rotated_at: { type: string, format: date-time, readOnly: true }
+    Session:
+      type: object
+      properties:
+        id: { type: string, example: S-9f31 }
+        user: { type: string }
+        target: { type: string }
+        account: { type: string }
+        started_at: { type: string, format: date-time }
+        ended_at: { type: string, format: date-time, nullable: true }
+        recording_sha256: { type: string }
+    AuditEvent:
+      type: object
+      properties:
+        seq: { type: integer }
+        ts: { type: string, format: date-time }
+        actor: { type: string }
+        action: { type: string }
+        object: { type: string }
+        details: { type: object }
+        prev_hash: { type: string }
+        hash: { type: string }
+paths:
+  /access-requests:
+    get:
+      summary: List access requests visible to caller
+      parameters: [{ name: status, in: query, schema: { type: string } }]
+      responses: { '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/AccessRequest' } } } } } }
+    post:
+      summary: Create JIT access request (FR-A2)
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AccessRequestCreate' } } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/AccessRequest' } } } }
+        '422': { description: Duration exceeds policy max TTL or not eligible, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  /access-requests/{id}/approve:
+    post:
+      summary: Approve request (FR-A3)
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { comment: { type: string } } } } } }
+      responses:
+        '200': { description: Approved, content: { application/json: { schema: { $ref: '#/components/schemas/AccessRequest' } } } }
+        '403': { description: Separation of duties violation, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  /access-requests/{id}/reject:
+    post:
+      summary: Reject request
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Rejected } }
+  /grants/{id}/revoke:
+    post:
+      summary: Revoke grant and terminate its sessions (FR-A6)
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '204': { description: Revoked } }
+  /targets:
+    get: { summary: List targets, responses: { '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Target' } } } } } } }
+    post:
+      summary: Create target (FR-A1)
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/Target' } } } }
+      responses: { '201': { description: Created } }
+  /accounts:
+    post:
+      summary: Register privileged account; secret is write-only (FR-V1)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Account'
+                - type: object
+                  properties: { secret: { type: string, writeOnly: true } }
+      responses: { '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Account' } } } } }
+  /accounts/{id}/rotate:
+    post:
+      summary: Trigger rotation now (FR-V2)
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '202': { description: Rotation job queued } }
+  /sessions:
+    get:
+      summary: Search sessions
+      parameters:
+        - { name: user, in: query, schema: { type: string } }
+        - { name: target, in: query, schema: { type: string } }
+        - { name: active, in: query, schema: { type: boolean } }
+      responses: { '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Session' } } } } } }
+  /sessions/{id}/terminate:
+    post:
+      summary: Terminate live session (FR-M3)
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '204': { description: Terminated } }
+  /sessions/{id}/recording:
+    get:
+      summary: Download recording (asciicast v2 / query log)
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Recording, content: { application/x-asciicast: {} } } }
+  /audit/events:
+    get:
+      summary: Search audit log (FR-AU3)
+      parameters:
+        - { name: actor, in: query, schema: { type: string } }
+        - { name: action, in: query, schema: { type: string } }
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+        - { name: format, in: query, schema: { type: string, enum: [json, jsonl, csv] } }
+      responses: { '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/AuditEvent' } } } } } }
+  /audit/verify:
+    post:
+      summary: Verify hash chain (FR-AU2)
+      responses: { '200': { description: Result, content: { application/json: { schema: { type: object, properties: { ok: { type: boolean }, events: { type: integer }, broken_at: { type: integer, nullable: true }, head: { type: string } } } } } } }
